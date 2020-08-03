@@ -9,6 +9,7 @@ public class MoveUnitTask : IUnitTask
 
     public IEnumerator BeginTask()
     {
+        float z = unit.transform.localPosition.z;
         List<Vector2Int> path = unit.currentPathFinder.FindPath(unit.transform.localPosition, targetPoint, unit.currentShip.currentData);
 
         if (path.Count == 0)
@@ -18,19 +19,22 @@ public class MoveUnitTask : IUnitTask
 
         for (int pointIndex = 0; pointIndex < path.Count; pointIndex++)
         {
-            float step = unit.speed * Time.deltaTime;
-
             Vector2 currentPoint = path[pointIndex];
 
             LookAt(currentPoint);
 
-            for (float alpha = 0; alpha < 1.0F + step; alpha += step)
+            float step = 0F;
+
+            while (Vector2.Distance(unit.transform.localPosition, currentPoint) > step * 1.5F)
             {
-                Vector2 newPoint = Vector2.Lerp(unit.transform.localPosition, currentPoint, alpha);
+                step = unit.speed * Time.deltaTime;
+                Vector3 direction = (currentPoint - (Vector2)unit.transform.localPosition).normalized;
+                Vector3 position = unit.transform.localPosition + direction * step;
+                position.z = z;
 
-                unit.transform.localPosition = new Vector3(newPoint.x, newPoint.y, unit.transform.localPosition.z);
+                unit.transform.localPosition = position;
 
-                yield return null;
+                yield return new WaitForEndOfFrame();
             }
         }
 

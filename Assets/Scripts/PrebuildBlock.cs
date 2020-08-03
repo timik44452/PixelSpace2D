@@ -1,14 +1,14 @@
 ﻿using Game;
 using UnityEngine;
 
-public class PrebuildBlock : InterractiveObject, ISelectable
+public class PrebuildBlock : MultiunitInterractiveObject, ISelectable
 {
     public int blockID = 0;
     public float rotation = 0;
     public Ship currentShip;
 
     private float progress = 0.0F;
-    private float endProgress = 10F;
+    private float endProgress = 1F;
     
 
     private void FixedUpdate()
@@ -33,6 +33,11 @@ public class PrebuildBlock : InterractiveObject, ISelectable
 
             Destroy(gameObject);
         }
+    }
+
+    public override bool IsProcessed()
+    {
+        return progress < endProgress;
     }
 
     public void OnSelected()

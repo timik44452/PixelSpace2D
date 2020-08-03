@@ -730,6 +730,7 @@ GameObject:
   - component: {fileID: 623979599}
   - component: {fileID: 623979600}
   - component: {fileID: 623979601}
+  - component: {fileID: 623979602}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -764,7 +765,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   direction: {x: 0, y: 0, z: 0}
-  IsHandWorkMode: 0
+  IsHandWorkMode: 1
 --- !u!114 &623979601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -775,6 +776,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dfc70d6b4b0109b4e88f7991e7173ae1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &623979602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 623979598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eac94e826e7a3d446bfd109d129ed803, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &640287399
@@ -1132,7 +1145,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 7.34e-43, y: -2.838032e-12, z: 4.5904e-41, w: -2.837848e-12}
+  m_BoundingSphereOverride: {x: 6.22e-43, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -1789,7 +1802,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d785b0c184070ad46b082f09717e4c02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snapshot: 0
 --- !u!4 &1334855733
 Transform:
   m_ObjectHideFlags: 0

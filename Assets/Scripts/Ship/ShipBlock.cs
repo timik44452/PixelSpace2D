@@ -28,13 +28,6 @@ public class ShipBlock
     [SerializeField]
     private float rotation;
 
-
-    public void Move(Vector2 velocity)
-    {
-        x += velocity.x;
-        y += velocity.y;
-    }
-
     public override bool Equals(object obj)
     {
         return obj is ShipBlock block &&

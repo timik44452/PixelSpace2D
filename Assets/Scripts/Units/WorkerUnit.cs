@@ -1,11 +1,19 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+
 using Game;
+using Game.Unit;
+
 
 [RequireComponent(typeof(PathFinder))]
 public class WorkerUnit : MonoBehaviour, ISelectable, IStrategicUnit
 {
+    private enum State
+    { 
+        Normal,
+        FiningPlaceToStay,
+        Resting
+    }
+
     public float speed = 1.0F;
 
     public float health
@@ -39,29 +47,42 @@ public class WorkerUnit : MonoBehaviour, ISelectable, IStrategicUnit
     private float _hunger = 0;
     private float _tiredness = 0;
 
-    private IUnitTask currentTask = null;
-    private Coroutine taskCoroutine = null;
-    private List<IUnitTask> unitTasks = new List<IUnitTask>();
+    private State _state = State.Normal;
 
+    private UnitTaskManager _taskManager;
 
     private void Start()
     {
         currentShip = GetComponentInParent<Ship>();
         currentPathFinder = GetComponent<PathFinder>();
+        _taskManager = new UnitTaskManager(this);
     }
 
     private void FixedUpdate()
     {
-        Debug.Log(tiredness);
-        if (tiredness > 65F)
+        if (tiredness > 15F && _state == State.Normal)
         {
-            AbordTask();
-            InvokeTask(UnitTaskFactory.Create<SleepUnitTask>(this));
+            _state = State.FiningPlaceToStay;
         }
 
-        if (currentTask == null && unitTasks.Count > 0)
+        if (_tiredness < 5F && _state != State.Normal)
         {
-            InvokeTask(GetAndRemoveTask());
+            _state = State.Normal;
+        }
+
+        if (_state == State.FiningPlaceToStay)
+        {
+            foreach (Bed bed in currentShip.GetInterractiveObjects<Bed>())
+            {
+                if (bed.IsProcessed() == false)
+                {
+                    _taskManager.RegisterPriorityTasks(
+                        UnitTaskFactory.Create(this, bed.transform.localPosition),
+                        UnitTaskFactory.Create(this, bed));
+
+                    _state = State.Resting;
+                }
+            }
         }
 
         tiredness += Time.fixedDeltaTime;
@@ -72,8 +93,9 @@ public class WorkerUnit : MonoBehaviour, ISelectable, IStrategicUnit
     {
         Vector2 localPoint = currentShip.transform.worldToLocalMatrix.MultiplyPoint(point);
         
-        RegisterTask(UnitTaskFactory.Create(this, localPoint));
-        RegisterTask(UnitTaskFactory.Create(this, target.GetComponent<InterractiveObject>()));
+        _taskManager.RegisterTasks(
+            UnitTaskFactory.Create(this, localPoint),
+            UnitTaskFactory.Create(this, target.GetComponent<InterractiveObject>()));
     }
 
     public void OnSelected()
@@ -84,59 +106,4 @@ public class WorkerUnit : MonoBehaviour, ISelectable, IStrategicUnit
     {
     }
 
-    private void RegisterTask(IUnitTask task, bool isPriority = false)
-    {
-        if (task != null)
-        {
-            if (isPriority)
-            {
-                AbordTask();
-                unitTasks.Insert(0, task);
-            }
-            else
-            {
-                unitTasks.Add(task);
-            }
-        }
-    }
-
-    private void AbordTask()
-    {
-        if (currentTask == null)
-        {
-            return;
-        }
-
-        currentTask.AbordTask();
-        StopCoroutine(taskCoroutine);
-        currentTask = null;
-    }
-
-    private void InvokeTask(IUnitTask task)
-    {
-        currentTask = task;
-        taskCoroutine = StartCoroutine(TaskHandler(task));
-    }
-
-    private IEnumerator TaskHandler(IUnitTask task)
-    {
-        yield return task?.BeginTask();
-
-        taskCoroutine = null;
-        currentTask = null;
-    }
-
-    private IUnitTask GetAndRemoveTask()
-    {
-        if (unitTasks.Count > 0)
-        {
-            IUnitTask unitTask = unitTasks[0];
-            unitTasks.RemoveAt(0);
-            return unitTask;
-        }
-        else
-        {
-            return null;
-        }
-    }
 }

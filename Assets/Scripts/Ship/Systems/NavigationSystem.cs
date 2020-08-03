@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class NavigationSystem : Terminal
+public class NavigationSystem : MonoBehaviour
 {
     private EngineControlTerminal engineControlTerminal;
 

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Game;
 
 public class ShipData : IShipDataContainer
 {
@@ -13,7 +14,7 @@ public class ShipData : IShipDataContainer
 
     public ShipBlock GetBlock(int x, int y)
     {
-        return m_blocks.Find(_block => _block.X == x && _block.Y == y); ;
+        return m_blocks.Find(_block => _block.X == x && _block.Y == y);
     }
 
     public ShipBlock GetBlockByID(int x, int y, int id)
@@ -84,5 +85,10 @@ public class ShipData : IShipDataContainer
     public IEnumerable<ShipBlock> GetBlocksBytID(int id)
     {
         return m_blocks.FindAll(x => x.ID == id);
+    }
+
+    public IEnumerable<ShipBlock> GetBlocks(int x, int y)
+    {
+        return m_blocks.FindAll(block => block.X == x && block.Y == y);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class EngineControlTerminal : Terminal
+public class EngineControlTerminal : MonoBehaviour
 {
     public Vector3 direction = Vector3.zero;
     public bool IsHandWorkMode = false;

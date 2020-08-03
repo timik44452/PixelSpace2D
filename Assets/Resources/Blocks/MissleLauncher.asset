@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 683da2344ce1a2f4d9b52b1172b4646f, type: 3}
-  m_Name: Wall
+  m_Name: MissleLauncher
   m_EditorClassIdentifier: 
   uv:
     serializedVersion: 2
@@ -18,4 +18,4 @@ MonoBehaviour:
     y: 0.5
     width: 0.5
     height: 0.5
-  prefab: {fileID: 0}
+  prefab: {fileID: 2337256852683457145, guid: d9b4824eee3ebb94992c82ee7b3b31c5, type: 3}

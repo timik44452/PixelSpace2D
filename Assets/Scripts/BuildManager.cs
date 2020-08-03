@@ -67,7 +67,9 @@ public class BuildManager : MonoBehaviour
             EndBuild();
         }
 
-        blockPrototype.position = currentShip.transform.localToWorldMatrix.MultiplyPoint((Vector2)localPoint);
+        Vector2 position = currentShip.transform.localToWorldMatrix.MultiplyPoint((Vector2)localPoint);
+
+        blockPrototype.position = new Vector3(position.x, position.y, m_camera.transform.position.z + 1);
         blockPrototype.rotation = Quaternion.Euler(0, 0, currentShip.transform.eulerAngles.z + rotation);
         blockPrototype.localScale = currentShip.transform.lossyScale;
     }
@@ -109,7 +111,6 @@ public class BuildManager : MonoBehaviour
         prebuildBlock.rotation = rotation;
 
         prebuildedBlockGO.AddComponent<BoxCollider2D>();
-
     }
 
     private Transform CreatePrototype()

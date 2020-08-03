@@ -1,8 +1,17 @@
-﻿using UnityEngine;
+﻿using Game;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class ShipExample : MonoBehaviour
 {
     public Texture2D shipTexture;
+
+    private Dictionary<Color, Blocks> blockDictionary = new Dictionary<Color, Blocks>()
+    {
+        { new Color(1, 1, 1), Blocks.Floor },
+        { new Color(0, 0, 0), Blocks.Wall },
+        { new Color(0, 0, 1), Blocks.Engine },
+    };
 
     public void Build(IShipDataContainer shipData)
     {
@@ -16,17 +25,14 @@ public class ShipExample : MonoBehaviour
 
                 if (pixel.a > 0)
                 {
-                    if (IsColor(pixel, new Color(0, 0, 1)))
+                    foreach(var keyPair in blockDictionary)
                     {
-                        shipData.AddBlock(_x, _y, 2);
-                    }
-                    else if (IsColor(pixel, new Color(1, 1, 1)))
-                    {
-                        shipData.AddBlock(_x, _y, 0);
-                    }
-                    else if (IsColor(pixel, new Color(0, 0, 0)))
-                    {
-                        shipData.AddBlock(_x, _y, 1);
+                        if (IsColor(pixel, keyPair.Key))
+                        {
+                            shipData.AddBlock(_x, _y, (int)keyPair.Value);
+
+                            break;
+                        }
                     }
                 }
             }

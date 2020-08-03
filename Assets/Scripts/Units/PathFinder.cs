@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Game;
 
 public class PathFinder : MonoBehaviour
 {
@@ -83,10 +84,25 @@ public class PathFinder : MonoBehaviour
 
             foreach (Vector2Int offset in offsets)
             {
+                var isValid = false;
                 var point = offset + currentCell.point;
-                var block = data.GetBlockByID(point.x, point.y, 0);
+                var blocks = data.GetBlocks(point.x, point.y);
 
-                if (block != null)
+                foreach (var block in blocks)
+                {
+                    if (block.ID == (int)Blocks.Floor)
+                    {
+                        isValid = true;
+                    }
+
+                    if (block.ID != (int)Blocks.Floor)
+                    {
+                        isValid = false;
+                        break;
+                    }
+                }
+
+                if (isValid)
                 {
                     viewing.Add(PathTracingItem.Create(point, from, to, currentCell));
                 }

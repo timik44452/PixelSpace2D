@@ -8,12 +8,17 @@ public class InterractiveObjectUnitTask : IUnitTask
 
     public IEnumerator BeginTask()
     {
-        currentObject.BeginWork(unit);
+        if (!currentObject.TryBeginWork(unit))
+        {
+            yield break;
+        }
 
-        while (currentObject != null && currentObject.Progress < 1.0F)
+        while (currentObject != null && currentObject.IsProcessed())
         {
             yield return new WaitForSeconds(0.25F);
         }
+
+        AbordTask();
     }
 
     public void AbordTask()

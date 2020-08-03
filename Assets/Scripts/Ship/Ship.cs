@@ -1,29 +1,19 @@
 ﻿using Game;
-using System.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(PolygonCollider2D), typeof(Rigidbody2D))]
 public class Ship : MonoBehaviour, ISelectable
 {
-    class ColliderBuildingItem
-    {
-        public float angle;
-        public Vector2 point;
-
-        public ColliderBuildingItem(Vector2 point)
-        {
-            this.point = point;
-            angle = Vector2.Angle(Vector2.up, point.normalized) * Mathf.Sign(-point.x);
-        }
-    }
-
     [HideInInspector]
     public RectInt Bounds
     {
         get => currentData.Bounds;
     }
+
     public IShipDataContainer currentData { get; } = new ShipData();
     public Rigidbody2D currentRigidbody2D { get; private set; }
 
@@ -31,6 +21,12 @@ public class Ship : MonoBehaviour, ISelectable
     private GameObject shipBody;
     private PolygonCollider2D polygonCollider2D;
     private int resolution = 5;
+
+    private void Awake()
+    {
+        currentRigidbody2D = GetComponent<Rigidbody2D>();
+        polygonCollider2D = GetComponent<PolygonCollider2D>();
+    }
 
     private void Start()
     {
@@ -44,13 +40,9 @@ public class Ship : MonoBehaviour, ISelectable
             return;
         }
 
-        currentRigidbody2D = GetComponent<Rigidbody2D>();
-        polygonCollider2D = GetComponent<PolygonCollider2D>();
-        
-
         BuildShip();
     }
-
+    
     public void BuildShip()
     {
         if (shipBody != null)
@@ -74,9 +66,19 @@ public class Ship : MonoBehaviour, ISelectable
         UpdateCollider();
     }
 
+    public T GetInterractiveObject<T>() where T : InterractiveObject
+    {
+        return GetComponentInChildren<T>();
+    }
+
+    public T[] GetInterractiveObjects<T>() where T : InterractiveObject
+    {
+        return GetComponentsInChildren<T>(); ;
+    }
+
     private void CreateMask()
     {
-        if(mask != null)
+        if (mask != null)
         {
             return;
         }
@@ -117,47 +119,100 @@ public class Ship : MonoBehaviour, ISelectable
 
                 if (idx >= 0 && idx < mask.width && idy >= 0 && idy < mask.height)
                 {
-                    float burn = (distance - radius) / (Random.value * burnRadiusMult);
+                    float burn = (distance - radius) / (UnityEngine.Random.value * burnRadiusMult);
 
                     Color color = mask.GetPixel(idx, idy) * burn;
-                    mask.SetPixel(idx, idy,  color);
+                    mask.SetPixel(idx, idy, color);
                 }
             }
-        
+
         mask.Apply();
+        StartCoroutine(CheckSegmentation());
     }
 
     private void UpdateCollider()
     {
         List<Vector2> points = new List<Vector2>();
-        List<ColliderBuildingItem> prePoints = new List<ColliderBuildingItem>();
+        Vector2Int[] offsets = new Vector2Int[]
+        {
+            new Vector2Int(-1, -1),
+            new Vector2Int(-1, 0),
+            new Vector2Int(-1, 1),
+            new Vector2Int(0, 1),
+            new Vector2Int(1, 1),
+            new Vector2Int(1, 0),
+            new Vector2Int(1, -1),
+            new Vector2Int(0, -1),
+        };
 
+        Vector2Int dir = Vector2Int.zero;
+        Vector2Int pos = Vector2Int.zero;
+
+        #region 0
         foreach (var block in currentData.GetBlocks())
         {
-            if (currentData.GetBlock(block.X + 1, block.Y) != null &&
-                currentData.GetBlock(block.X - 1, block.Y) != null &&
-                currentData.GetBlock(block.X, block.Y + 1) != null &&
-                currentData.GetBlock(block.X, block.Y - 1) != null)
+            bool isBreak = false;
+
+            for (int i = 0; i < ServiceData.offsets.Length; i++)
             {
-                continue;
+                dir = ServiceData.offsets[i];
+
+                if (GetEdges(block.X, block.Y) < 15 && GetEdges(block.X + dir.x, block.Y + dir.y) < 15)
+                {
+                    pos = new Vector2Int(block.X, block.Y);
+                    isBreak = true;
+                    break;
+                }
             }
 
-            var item = new ColliderBuildingItem(new Vector2(block.X, block.Y));
-
-            if (prePoints.Find(x => x.point == item.point) == null)
+            if (isBreak)
             {
-                prePoints.Add(item);
+                break;
             }
         }
+        #endregion
+        #region 1
+        int iteration = 0;
 
-        if (prePoints.Count == 0)
+        while (++iteration < currentData.GetBlocks().Count())
         {
-            return;
-        }
+            ShipBlock nextBlock = null;
 
-        points = (from item in prePoints 
-                  orderby item.angle 
-                  select item.point).ToList();
+            foreach(Vector2Int _offset in offsets)
+            {
+                if (_offset == -dir)
+                {
+                    continue;
+                }
+
+                var point = pos + _offset;
+                var tempBlock = currentData.GetBlock(point.x, point.y);
+                
+                if (tempBlock == null || points.Contains(point))
+                {
+                    continue;
+                }
+
+                var edges = GetEdges(point.x, point.y);
+
+                if (edges >= 15)
+                {
+                    continue;
+                }
+
+                nextBlock = tempBlock;
+            }
+
+            if (nextBlock == null)
+            {
+                break;
+            }
+
+            points.Add(pos);
+            dir = new Vector2Int(nextBlock.X, nextBlock.Y) - pos;
+            pos += dir;
+        }
+        #endregion
 
         polygonCollider2D.points = points.ToArray();
     }
@@ -173,12 +228,26 @@ public class Ship : MonoBehaviour, ISelectable
         UIManager.Instance.HideWidget<ShipManagmentWidget>();
     }
 
-    public int snapshot = 0;
-    private List<List<ShipBlock[]>> segmentsnapshots = new List<List<ShipBlock[]>>();
+    private int GetEdges(int x, int y)
+    {
+        int edges = 0;
+
+        for (int i = 0; i < ServiceData.offsets.Length; i++)
+        {
+            Vector2Int offset = ServiceData.offsets[i];
+
+            if (currentData.GetBlock(x + offset.x, y + offset.y) != null)
+            {
+                edges |= 1 << i;
+            }
+        }
+
+        return edges;
+    }
+
     private IEnumerator CheckSegmentation()
     {
         int iteration = 0;
-        segmentsnapshots.Clear();
 
         List<List<ShipBlock>> segments = new List<List<ShipBlock>>();
 
@@ -227,13 +296,6 @@ public class Ship : MonoBehaviour, ISelectable
                 segments.Add(newSegment);
             }
 
-            var tempBuffer = new List<ShipBlock[]>();
-
-            foreach (var item in segments)
-                tempBuffer.Add(item.ToArray());
-
-            segmentsnapshots.Add(tempBuffer);
-
             if (iteration % 50 == 0)
             {
                 yield return null;
@@ -244,10 +306,19 @@ public class Ship : MonoBehaviour, ISelectable
 
         if (segments.Count > 1)
         {
+            segments = segments.OrderByDescending(x => x.Count).ToList();
+
             for (int i = 1; i < segments.Count; i++)
             {
                 var newShipGO = new GameObject();
+
+                newShipGO.transform.position = transform.position;
+                newShipGO.transform.rotation = transform.rotation;
+
                 var newShip = newShipGO.AddComponent<Ship>();
+
+                newShip.currentRigidbody2D.gravityScale = currentRigidbody2D.gravityScale;
+                newShip.currentRigidbody2D.velocity = currentRigidbody2D.velocity;
 
                 foreach (var block in segments[i])
                 {
@@ -257,27 +328,6 @@ public class Ship : MonoBehaviour, ISelectable
             }
 
             BuildShip();
-        }
-    }
-    private void OnDrawGizmos()
-    {
-        if (snapshot >= 0 && snapshot < segmentsnapshots.Count)
-        {
-            List<ShipBlock[]> currentSnapshot = segmentsnapshots[snapshot];
-
-            for (int i = 0; i < currentSnapshot.Count; i++)
-            {
-                float alpha = (i + 1.0F) / currentSnapshot.Count;
-                Color color = Color.Lerp(Color.red, Color.green, alpha);
-
-                Gizmos.color = color;
-
-                foreach (var block in currentSnapshot[i])
-                {
-                    Vector3 point = new Vector3(block.X, block.Y);
-                    Gizmos.DrawCube(point, Vector3.one);
-                }
-            }
         }
     }
 }
