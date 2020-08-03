@@ -18,4 +18,4 @@ MonoBehaviour:
     y: 0.5
     width: 0.5
     height: 0.5
-  prefab: {fileID: 0}
+  prefab: {fileID: 5381928326615301903, guid: 6b277fdd99d668849860091086d33b34, type: 3}

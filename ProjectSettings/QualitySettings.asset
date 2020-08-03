@@ -7,7 +7,7 @@ QualitySettings:
   m_CurrentQuality: 0
   m_QualitySettings:
   - serializedVersion: 2
-    name: Ultra
+    name: Default
     pixelLightCount: 4
     shadows: 0
     shadowResolution: 2
@@ -40,7 +40,7 @@ QualitySettings:
     asyncUploadBufferSize: 16
     asyncUploadPersistentBuffer: 1
     resolutionScalingFixedDPIFactor: 1
-    customRenderPipeline: {fileID: 11400000, guid: bfd87c2257de17b4aa111fb776c86b92,
+    customRenderPipeline: {fileID: 11400000, guid: 7832d96f3e34ffe45aba29b8d64f6f8d,
       type: 2}
     excludedTargetPlatforms: []
   m_PerPlatformDefaultQuality:
