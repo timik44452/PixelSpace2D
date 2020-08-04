@@ -120,7 +120,7 @@ public static class ShipBuilder
             Vector3 localPosition = new Vector3(block.X, block.Y);
             Quaternion localRotation = Quaternion.Euler(0, 0, block.Rotation);
 
-            if (blockResource.prefab != null)
+            if (blockResource.usePrefab == true && blockResource.prefab != null)
             {
                 GameObject prefab = Object.Instantiate(blockResource.prefab);
 
@@ -132,8 +132,13 @@ public static class ShipBuilder
             int verticesIndex = vertices.Count;
             Matrix4x4 rotateMatrix = Matrix4x4.Rotate(localRotation);
 
-            Rect uv = blockResource.uv;
+            Rect uv = Rect.zero;
             Rect uv2 = new Rect((block.X - data.Bounds.x) / (float)data.Bounds.width, (block.Y - data.Bounds.y) / (float)data.Bounds.height, uv2Width, uv2Height);
+
+            if (blockResource.useAtlas == true)
+            {
+                uv = blockResource.uv;
+            }
 
             Vector2 uv_center = new Vector2(uv.x + uv.width * 0.5F, uv.y + uv.height * 0.5F);
             Vector2 uv_up = rotateMatrix.MultiplyPoint(new Vector2(0, uv.height * 0.5F));

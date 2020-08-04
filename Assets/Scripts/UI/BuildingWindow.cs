@@ -58,8 +58,16 @@ public class BuildingWindow : MonoBehaviour, IUIWindow
 
             if (iconImage != null)
             {
-                iconImage.texture = ResourceUtility.atlas;
-                iconImage.uvRect = block.uv;
+                if (block.usePreview == true)
+                {
+                    iconImage.texture = block.preview;
+                    iconImage.uvRect = new Rect(0, 0, 1, 1);
+                }
+                else if (block.useAtlas == true)
+                {
+                    iconImage.texture = ResourceUtility.atlas;
+                    iconImage.uvRect = block.uv;
+                }
             }
 
             if (nameText != null)
@@ -68,7 +76,6 @@ public class BuildingWindow : MonoBehaviour, IUIWindow
             }
 
             blockGameObject.transform.SetParent(container, false);
-            //blockGameObject
         }
     }
 }
