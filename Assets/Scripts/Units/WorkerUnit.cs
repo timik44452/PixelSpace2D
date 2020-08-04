@@ -81,8 +81,6 @@ public class WorkerUnit : MonoBehaviour, ISelectable, IStrategicUnit
                         UnitTaskFactory.Create(this, bed));
 
                     _state = State.Resting;
-
-                    break;
                 }
             }
         }
