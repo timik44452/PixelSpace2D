@@ -1,9 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu]
 public class BlockResourceItem : ScriptableObject
 {
+    public Blocks type;
+
     public bool useAtlas;
     public bool usePreview;
     public bool usePrefab;
@@ -11,7 +12,4 @@ public class BlockResourceItem : ScriptableObject
     public Rect uv;
     public Texture preview;
     public GameObject prefab;
-
-    [NonSerialized, HideInInspector]
-    public int ID;
 }

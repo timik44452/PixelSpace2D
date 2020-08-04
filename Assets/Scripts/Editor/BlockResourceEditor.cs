@@ -8,6 +8,8 @@ public class BlockResourceEditor : Editor
     {
         BlockResourceItem item = target as BlockResourceItem;
 
+        item.type = (Blocks)EditorGUILayout.EnumPopup(item.type);
+
         item.useAtlas = EditorGUILayout.Toggle("Use atlas", item.useAtlas);
 
         if (item.useAtlas == true)

@@ -53,7 +53,7 @@ public class BuildingWindow : MonoBehaviour, IUIWindow
 
             if (itemButton != null)
             {
-                itemButton.onClick.AddListener(() => { BuildManager.Instance.BeginBuild(block.ID, currentShip); Hide(); });
+                itemButton.onClick.AddListener(() => { BuildManager.Instance.BeginBuild((int)block.type, currentShip); Hide(); });
             }
 
             if (iconImage != null)
@@ -72,7 +72,7 @@ public class BuildingWindow : MonoBehaviour, IUIWindow
 
             if (nameText != null)
             {
-                nameText.text = ((Blocks)block.ID).ToString();
+                nameText.text = (block.type).ToString();
             }
 
             blockGameObject.transform.SetParent(container, false);

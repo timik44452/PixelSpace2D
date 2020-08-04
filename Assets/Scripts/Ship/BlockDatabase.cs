@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
 public class BlockDatabase
@@ -15,30 +14,41 @@ public class BlockDatabase
     public static BlockDatabase LoadDatabase(string path)
     {
         BlockDatabase blockDatabase = new BlockDatabase();
-
-        foreach (int blockID in Enum.GetValues(typeof(Blocks)))
+        
+        foreach (BlockResourceItem resourceItem in Resources.LoadAll<BlockResourceItem>(path))
         {
-            string blockName = Enum.GetName(typeof(Blocks), blockID);
-            string blockPath = Path.Combine(path, blockName);
-
-            BlockResourceItem blockResourceItem = Resources.Load<BlockResourceItem>(blockPath);
-
-            if (blockResourceItem == null)
-            {
-                Debug.LogWarning($"{blockName} resource hasn't found");
-            }
-            else
-            {
-                blockResourceItem.ID = blockID;
-                blockDatabase.blocks.Add(blockResourceItem);
-            }
+            blockDatabase.blocks.Add(resourceItem);
         }
 
         return blockDatabase;
     }
 
+    public static void CheckDatabase(BlockDatabase database)
+    {
+        foreach (string name in Enum.GetNames(typeof(Blocks)))
+        {
+            Blocks block = (Blocks)Enum.Parse(typeof(Blocks), name);
+
+            int count = database.blocks.FindAll(x => x.type == block).Count;
+
+            if(count == 0)
+            {
+                Debug.LogWarning($"{name} resource hasn't found");
+            }
+            else if (count > 1)
+            {
+                Debug.LogWarning($"Found more that one block {name}");
+            }
+        }
+    }
+
+    public BlockResourceItem GetBlock(Blocks block)
+    {
+        return blocks.Find(x => x.type == block);
+    }
+
     public BlockResourceItem GetBlock(int ID)
     {
-        return blocks.Find(x => x.ID == ID);
+        return blocks.Find(x => x.type == (Blocks)ID);
     }
 }
