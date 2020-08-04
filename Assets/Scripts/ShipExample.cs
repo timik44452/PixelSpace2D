@@ -29,7 +29,8 @@ public class ShipExample : MonoBehaviour
                     {
                         if (IsColor(pixel, keyPair.Key))
                         {
-                            shipData.AddBlock(_x, _y, (int)keyPair.Value);
+                            ShipBlock block = ShipBlock.Create(keyPair.Value, _x, _y);
+                            shipData.AddBlock(block);
 
                             break;
                         }

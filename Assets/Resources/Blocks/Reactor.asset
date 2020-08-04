@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Reactor
   m_EditorClassIdentifier: 
   type: 5
+  Width: 3
+  Height: 3
   useAtlas: 0
   usePreview: 1
   usePrefab: 1

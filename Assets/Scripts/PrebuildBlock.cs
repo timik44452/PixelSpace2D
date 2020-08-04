@@ -22,12 +22,12 @@ public class PrebuildBlock : MultiunitInterractiveObject, ISelectable
 
         if (progress >= endProgress)
         {
-            int localPositionX = Mathf.RoundToInt(transform.localPosition.x);
-            int localPositionY = Mathf.RoundToInt(transform.localPosition.y);
+            int x = Mathf.RoundToInt(transform.localPosition.x);
+            int y = Mathf.RoundToInt(transform.localPosition.y);
 
-            var block = currentShip.currentData.AddBlock(localPositionX, localPositionY, blockID);
+            ShipBlock block = ShipBlock.Create(blockID, x, y, rotation);
 
-            block.Rotation = rotation;
+            currentShip.currentData.AddBlock(block);
 
             currentShip.BuildShip();
 

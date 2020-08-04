@@ -32,14 +32,13 @@ public class StrategyManager : MonoBehaviour
 
         bool isValid = raycastHit2D.collider != null && raycastHit2D.collider.GetComponent<ISelectable>() != null;
 
-        target.gameObject.SetActive(raycastHit2D.collider != null);
+        target.gameObject.SetActive(isValid);
 
         if (isValid)
         {
             Vector2 localPoint = raycastHit2D.transform.worldToLocalMatrix.MultiplyPoint(worldPoint);
 
             localPoint.x = Mathf.Round(localPoint.x);
-            localPoint.y = Mathf.Round(localPoint.y);
             localPoint.y = Mathf.Round(localPoint.y);
 
             target.position = raycastHit2D.transform.localToWorldMatrix.MultiplyPoint(localPoint);

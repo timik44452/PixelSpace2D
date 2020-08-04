@@ -10,9 +10,6 @@ namespace Game
         void AddBlock(ShipBlock block);
         void RemoveBlock(ShipBlock block);
 
-        ShipBlock AddBlock(int x, int y, int id);
-        ShipBlock RemoveBlock(int x, int y);
-
         ShipBlock GetBlock(int x, int y);
         ShipBlock GetBlockByID(int x, int y, int id);
 
