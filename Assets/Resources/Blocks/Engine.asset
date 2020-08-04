@@ -12,10 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 683da2344ce1a2f4d9b52b1172b4646f, type: 3}
   m_Name: Engine
   m_EditorClassIdentifier: 
+  type: 2
+  useAtlas: 1
+  usePreview: 0
+  usePrefab: 1
   uv:
     serializedVersion: 2
     x: 0.5
     y: 0
     width: 0.5
     height: 0.5
+  preview: {fileID: 0}
   prefab: {fileID: 2521682829082929818, guid: 8bfc31d687487944d9469db1b859ef63, type: 3}

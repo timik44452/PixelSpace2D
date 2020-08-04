@@ -12,10 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 683da2344ce1a2f4d9b52b1172b4646f, type: 3}
   m_Name: Reactor
   m_EditorClassIdentifier: 
+  type: 5
+  useAtlas: 0
+  usePreview: 1
+  usePrefab: 1
   uv:
     serializedVersion: 2
     x: 0
     y: 0
     width: 0
     height: 0
-  prefab: {fileID: 0}
+  preview: {fileID: 2800000, guid: 905bb74aac9e2ae498658fa7ed6369cb, type: 3}
+  prefab: {fileID: 2638432227878838441, guid: fbee30ab7183fe547bf524e4dc0c58e4, type: 3}

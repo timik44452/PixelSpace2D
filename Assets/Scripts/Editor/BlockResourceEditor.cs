@@ -8,27 +8,62 @@ public class BlockResourceEditor : Editor
     {
         BlockResourceItem item = target as BlockResourceItem;
 
-        item.type = (Blocks)EditorGUILayout.EnumPopup(item.type);
+        Blocks type = (Blocks)EditorGUILayout.EnumPopup(item.type);
+        Rect uv = item.uv;
+        Texture preview = item.preview;
+        GameObject prefab = item.prefab;
 
-        item.useAtlas = EditorGUILayout.Toggle("Use atlas", item.useAtlas);
-
-        if (item.useAtlas == true)
+        var useAtlas = EditorGUILayout.Toggle("Use atlas", item.useAtlas);
+        
+        if (useAtlas == true)
         {
-            item.uv = EditorGUILayout.RectField(item.uv);
+            uv = EditorGUILayout.RectField(item.uv);
         }
 
-        item.usePreview = EditorGUILayout.Toggle("Use custom prewiew", item.usePreview);
-
-        if (item.usePreview == true)
+        var usePreview = EditorGUILayout.Toggle("Use custom prewiew", item.usePreview);
+        
+        if (usePreview == true)
         {
-            item.preview = (Texture)EditorGUILayout.ObjectField("Preview", item.preview, typeof(Texture), false);
+            preview = (Texture)EditorGUILayout.ObjectField("Preview", item.preview, typeof(Texture), false);
         }
 
-        item.usePrefab = EditorGUILayout.Toggle("Use prefab", item.usePrefab);
-
-        if (item.usePrefab == true)
+        var usePrefab = EditorGUILayout.Toggle("Use prefab", item.usePrefab);
+        
+        if (usePrefab == true)
         {
-            item.prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", item.prefab, typeof(GameObject), false);
+            prefab = (GameObject)EditorGUILayout.ObjectField("Prefab", item.prefab, typeof(GameObject), false);
+        }
+
+
+        if (item.type != type)
+        {
+            item.type = type;
+
+            EditorUtility.SetDirty(item);
+        }
+
+        if (item.useAtlas != useAtlas || item.uv != uv)
+        {
+            item.useAtlas = useAtlas;
+            item.uv = uv;
+
+            EditorUtility.SetDirty(item);
+        }
+
+        if (item.usePrefab != usePrefab || item.prefab != prefab)
+        {
+            item.usePrefab = usePrefab;
+            item.prefab = prefab;
+
+            EditorUtility.SetDirty(item);
+        }
+
+        if (item.usePreview != usePreview || item.preview != preview)
+        {
+            item.usePreview = usePreview;
+            item.preview = preview;
+
+            EditorUtility.SetDirty(item);
         }
     }
 }

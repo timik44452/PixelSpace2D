@@ -12,10 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 683da2344ce1a2f4d9b52b1172b4646f, type: 3}
   m_Name: MissleLauncher
   m_EditorClassIdentifier: 
+  type: 4
+  useAtlas: 0
+  usePreview: 1
+  usePrefab: 1
   uv:
     serializedVersion: 2
     x: 0.5
     y: 0.5
     width: 0.5
     height: 0.5
+  preview: {fileID: 0}
   prefab: {fileID: 2337256852683457145, guid: d9b4824eee3ebb94992c82ee7b3b31c5, type: 3}
