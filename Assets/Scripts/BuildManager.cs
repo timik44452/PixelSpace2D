@@ -120,6 +120,11 @@ public class BuildManager : MonoBehaviour
 
         if (block != null)
         {
+            if (block.useAtlas == false && block.usePrefab == true)
+            {
+                return CreateViewDublicate(block.prefab);
+            }
+
             var renderer = target.AddComponent<MeshRenderer>();
             var meshFilter = target.AddComponent<MeshFilter>();
             var mesh = new Mesh()
@@ -143,21 +148,54 @@ public class BuildManager : MonoBehaviour
                     3
                 },
 
-                uv = new Vector2[]
-                {
-                    new Vector2(block.uv.xMin, block.uv.yMin),
-                    new Vector2(block.uv.xMin, block.uv.yMax),
-                    new Vector2(block.uv.xMax, block.uv.yMax),
-                    new Vector2(block.uv.xMax, block.uv.yMin)
-                }
+                uv = GetUV(block)
             };
 
             mesh.RecalculateNormals();
 
+            if (block.useAtlas == true)
+            {
+                renderer.material = ResourceUtility.shipMaterial;
+            }
+
             meshFilter.sharedMesh = mesh;
-            renderer.material = ResourceUtility.shipMaterial;
         }
 
         return target.transform;
+    }
+
+    private Transform CreateViewDublicate(GameObject prefab)
+    {
+        GameObject view = Instantiate(prefab);
+
+        foreach (Component component in view.GetComponentsInChildren<Component>())
+        {
+            if (component is Transform ||
+                component is Renderer ||
+                component is MeshFilter)
+            {
+                continue;
+            }
+
+            Destroy(component);
+        }
+
+        return view.transform;
+    }
+
+    private Vector2[] GetUV(BlockResourceItem item)
+    {
+        if (item.useAtlas == true)
+        {
+            return new Vector2[]
+                {
+                    new Vector2(item.uv.xMin, item.uv.yMin),
+                    new Vector2(item.uv.xMin, item.uv.yMax),
+                    new Vector2(item.uv.xMax, item.uv.yMax),
+                    new Vector2(item.uv.xMax, item.uv.yMin)
+                };
+        }
+
+        return ServiceData.defaultUV;
     }
 }

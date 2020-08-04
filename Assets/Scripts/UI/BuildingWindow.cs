@@ -53,22 +53,29 @@ public class BuildingWindow : MonoBehaviour, IUIWindow
 
             if (itemButton != null)
             {
-                itemButton.onClick.AddListener(() => { BuildManager.Instance.BeginBuild(block.ID, currentShip); Hide(); });
+                itemButton.onClick.AddListener(() => { BuildManager.Instance.BeginBuild((int)block.type, currentShip); Hide(); });
             }
 
             if (iconImage != null)
             {
-                iconImage.texture = ResourceUtility.atlas;
-                iconImage.uvRect = block.uv;
+                if (block.usePreview == true)
+                {
+                    iconImage.texture = block.preview;
+                    iconImage.uvRect = new Rect(0, 0, 1, 1);
+                }
+                else if (block.useAtlas == true)
+                {
+                    iconImage.texture = ResourceUtility.atlas;
+                    iconImage.uvRect = block.uv;
+                }
             }
 
             if (nameText != null)
             {
-                nameText.text = ((Blocks)block.ID).ToString();
+                nameText.text = (block.type).ToString();
             }
 
             blockGameObject.transform.SetParent(container, false);
-            //blockGameObject
         }
     }
 }
