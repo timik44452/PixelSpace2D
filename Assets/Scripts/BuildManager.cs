@@ -10,7 +10,7 @@ public class BuildManager : MonoBehaviour
 
     private int blockID = 0;
     private float rotation = 0;
-
+    private Vector3 scale = Vector3.one;
 
     private void Awake()
     {
@@ -68,10 +68,10 @@ public class BuildManager : MonoBehaviour
         }
 
         Vector2 position = currentShip.transform.localToWorldMatrix.MultiplyPoint((Vector2)localPoint);
-
+        
         blockPrototype.position = new Vector3(position.x, position.y, m_camera.transform.position.z + 1);
         blockPrototype.rotation = Quaternion.Euler(0, 0, currentShip.transform.eulerAngles.z + rotation);
-        blockPrototype.localScale = currentShip.transform.lossyScale;
+        blockPrototype.localScale = Vector3.Scale(scale, currentShip.transform.lossyScale);
     }
 
     public void BeginBuild(int blockID, Ship ship)
@@ -100,7 +100,7 @@ public class BuildManager : MonoBehaviour
         prebuildedBlockGO.transform.parent = currentShip.transform;
         prebuildedBlockGO.transform.localRotation = Quaternion.identity;
         prebuildedBlockGO.transform.localPosition = new Vector3(x, y, -1);
-        prebuildedBlockGO.transform.localScale = Vector3.one;
+        prebuildedBlockGO.transform.localScale = Vector3.Scale(scale, currentShip.transform.lossyScale);
 
         var spriteRenderer = prebuildedBlockGO.AddComponent<SpriteRenderer>();
         var prebuildBlock = prebuildedBlockGO.AddComponent<PrebuildBlock>();
@@ -120,6 +120,8 @@ public class BuildManager : MonoBehaviour
 
         if (block != null)
         {
+            scale = new Vector3(block.Width, block.Height, 1);
+
             if (block.useAtlas == false && block.usePrefab == true)
             {
                 return CreateViewDublicate(block.prefab);

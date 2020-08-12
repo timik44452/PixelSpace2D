@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-public static class ElementHelper
+public static class ComponentExtension
 {
     /// <summary>
     /// Возвращает элемент с именеи формата $name
@@ -82,4 +82,13 @@ public static class ElementHelper
         return new List<T>(parent.GetComponentsInChildren<T>(true));
     }
 
+    public static T AddOrGetComponent<T>(this GameObject gameObject) where T : Component
+    {
+        if (gameObject.GetComponent<T>() == null)
+        {
+            gameObject.AddComponent<T>();
+        }
+
+        return gameObject.GetComponent<T>();
+    }
 }

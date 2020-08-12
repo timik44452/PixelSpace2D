@@ -57,13 +57,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
-    - _CamSpeed0: 0.001
-    - _CamSpeed1: 0.001
+    - _CamSpeed0: 0.01
+    - _CamSpeed1: 0.01
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Exposure0: 0.47
-    - _Exposure1: 0.83
+    - _Exposure0: 1
+    - _Exposure1: 1
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
@@ -80,5 +80,5 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _MainColor: {r: 0, g: 0, b: 0, a: 0}
-    - _Offset0: {r: 0, g: 0, b: 4, a: 4}
+    - _Offset0: {r: 0, g: 0, b: 2, a: 2}
     - _Offset1: {r: 0.36, g: 0, b: 2.5, a: 2.5}

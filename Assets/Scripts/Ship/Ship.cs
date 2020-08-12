@@ -1,6 +1,5 @@
 ﻿using Game;
-using System;
-using System.Collections;
+using Game.ShipService;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -16,16 +15,18 @@ public class Ship : MonoBehaviour, ISelectable
 
     public IShipDataContainer currentData { get; } = new ShipData();
     public Rigidbody2D currentRigidbody2D { get; private set; }
+    public Material material { get; private set; }
 
-    private Texture2D mask;
     private GameObject shipBody;
     private PolygonCollider2D polygonCollider2D;
-    private int resolution = 5;
-
+    private ShipDestructionService destructionService;
+    
     private void Awake()
     {
+        shipBody = CreateBody();
         currentRigidbody2D = GetComponent<Rigidbody2D>();
         polygonCollider2D = GetComponent<PolygonCollider2D>();
+        material = shipBody.GetComponent<MeshRenderer>().material;
     }
 
     private void Start()
@@ -42,26 +43,18 @@ public class Ship : MonoBehaviour, ISelectable
 
         BuildShip();
     }
-    
+
+
     public void BuildShip()
     {
-        if (shipBody != null)
+        if (destructionService == null)
         {
-            Destroy(shipBody);
+            destructionService = new ShipDestructionService(this);
         }
 
-        CreateMask();
-
-        shipBody = ShipBuilder.Build(currentData);
-
-        shipBody.GetComponent<MeshRenderer>().material.SetTexture("_Mask", mask);
-
+        ShipBuilder.Build(shipBody, currentData);
+        
         transform.localScale = Vector3.one * 0.5F;
-
-        shipBody.transform.parent = transform;
-        shipBody.transform.localRotation = Quaternion.identity;
-        shipBody.transform.localPosition = Vector3.zero;
-        shipBody.transform.localScale = Vector3.one;
 
         UpdateCollider();
     }
@@ -74,60 +67,6 @@ public class Ship : MonoBehaviour, ISelectable
     public T[] GetInterractiveObjects<T>() where T : InterractiveObject
     {
         return GetComponentsInChildren<T>(); ;
-    }
-
-    private void CreateMask()
-    {
-        if (mask != null)
-        {
-            return;
-        }
-
-        mask = new Texture2D(currentData.Bounds.width * resolution, currentData.Bounds.height * resolution);
-        mask.wrapMode = ResourceUtility.atlas.wrapMode;
-        mask.filterMode = ResourceUtility.atlas.filterMode;
-
-        for (int x = 0; x < mask.width; x++)
-            for (int y = 0; y < mask.height; y++)
-            {
-                mask.SetPixel(x, y, Color.white);
-            }
-
-        mask.Apply();
-    }
-
-    public void Explosion(float radius, Vector2 point)
-    {
-        float burnRadiusMult = 0.21F;
-
-        for (float x = point.x - radius; x < point.x + radius; x += transform.localScale.x / resolution)
-            for (float y = point.y - radius; y < point.y + radius; y += transform.localScale.y / resolution)
-            {
-                Vector2 localPoint = transform.worldToLocalMatrix.MultiplyPoint(new Vector2(x, y));
-                float distance = Vector2.Distance(new Vector2(x, y), point);
-
-                if (distance < radius - 0.5F)
-                {
-                    int block_x = Mathf.RoundToInt(localPoint.x);
-                    int block_y = Mathf.RoundToInt(localPoint.y);
-
-                    currentData.RemoveBlock(block_x, block_y);
-                }
-
-                int idx = Mathf.RoundToInt((localPoint.x - currentData.Bounds.x) * resolution);
-                int idy = Mathf.RoundToInt((localPoint.y - currentData.Bounds.y) * resolution);
-
-                if (idx >= 0 && idx < mask.width && idy >= 0 && idy < mask.height)
-                {
-                    float burn = (distance - radius) / (UnityEngine.Random.value * burnRadiusMult);
-
-                    Color color = mask.GetPixel(idx, idy) * burn;
-                    mask.SetPixel(idx, idy, color);
-                }
-            }
-
-        mask.Apply();
-        StartCoroutine(CheckSegmentation());
     }
 
     private void UpdateCollider()
@@ -245,89 +184,18 @@ public class Ship : MonoBehaviour, ISelectable
         return edges;
     }
 
-    private IEnumerator CheckSegmentation()
+    private GameObject CreateBody()
     {
-        int iteration = 0;
+        GameObject shipBody = new GameObject("Ship mesh");
 
-        List<List<ShipBlock>> segments = new List<List<ShipBlock>>();
+        shipBody.transform.parent = transform;
+        shipBody.transform.localRotation = Quaternion.identity;
+        shipBody.transform.localPosition = Vector3.zero;
+        shipBody.transform.localScale = Vector3.one;
 
-        foreach (var block in currentData.GetBlocks())
-        {
-            List<int> segmentIndexes = new List<int>();
+        shipBody.AddComponent<MeshFilter>();
+        shipBody.AddComponent<MeshRenderer>().material = ResourceUtility.shipMaterial;
 
-            for (int i = 0; i < segments.Count; i++)
-            {
-                if (segments[i].Find(x =>
-                    (x.X == block.X + 1 && x.Y == block.Y) ||
-                    (x.X == block.X - 1 && x.Y == block.Y) ||
-                    (x.X == block.X && x.Y == block.Y + 1) ||
-                    (x.X == block.X && x.Y == block.Y - 1)) != null)
-                {
-                    segmentIndexes.Add(i);
-                }
-            }
-
-            if (segmentIndexes.Count == 0)
-            {
-                segments.Add(new List<ShipBlock>());
-                segments[segments.Count - 1].Add(block);
-            }
-            else if (segmentIndexes.Count == 1)
-            {
-                segments[segmentIndexes[0]].Add(block);
-            }
-            else
-            {
-                List<ShipBlock> newSegment = new List<ShipBlock>();
-
-                segmentIndexes = segmentIndexes.OrderByDescending(x => x).ToList();
-
-                while (segmentIndexes.Count > 0)
-                {
-                    int index = segmentIndexes[0];
-                    segmentIndexes.RemoveAt(0);
-
-                    newSegment.AddRange(segments[index]);
-                    segments.RemoveAt(index);
-                }
-
-                newSegment.Add(block);
-
-                segments.Add(newSegment);
-            }
-
-            if (iteration % 50 == 0)
-            {
-                yield return null;
-            }
-
-            iteration++;
-        }
-
-        if (segments.Count > 1)
-        {
-            segments = segments.OrderByDescending(x => x.Count).ToList();
-
-            for (int i = 1; i < segments.Count; i++)
-            {
-                var newShipGO = new GameObject();
-
-                newShipGO.transform.position = transform.position;
-                newShipGO.transform.rotation = transform.rotation;
-
-                var newShip = newShipGO.AddComponent<Ship>();
-
-                newShip.currentRigidbody2D.gravityScale = currentRigidbody2D.gravityScale;
-                newShip.currentRigidbody2D.velocity = currentRigidbody2D.velocity;
-
-                foreach (var block in segments[i])
-                {
-                    newShip.currentData.AddBlock(block);
-                    currentData.RemoveBlock(block);
-                }
-            }
-
-            BuildShip();
-        }
+        return shipBody;
     }
 }

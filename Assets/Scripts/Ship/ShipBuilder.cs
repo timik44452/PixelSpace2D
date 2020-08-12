@@ -4,21 +4,17 @@ using Game;
 
 public static class ShipBuilder
 {
-    public static GameObject Build(IShipDataContainer data)
+    public static void Build(GameObject shipBody, IShipDataContainer data)
     {
         List<int> triangles = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
         List<Vector2> uvs2 = new List<Vector2>();
         List<Vector3> vertices = new List<Vector3>();
 
-        var ship = new GameObject("Ship mesh");
-
-        var meshFilter = ship.AddComponent<MeshFilter>();
-        var meshRenderer = ship.AddComponent<MeshRenderer>();
-
         float delta = 0.5F;
         float uv2Width = 1F / data.Bounds.width;
         float uv2Height = 1F / data.Bounds.height;
+
 
         foreach (ShipBlock block in data.GetBlocks())
         {
@@ -36,9 +32,10 @@ public static class ShipBuilder
             {
                 GameObject prefab = Object.Instantiate(blockResource.prefab);
 
-                prefab.transform.parent = ship.transform;
+                prefab.transform.parent = shipBody.transform;
                 prefab.transform.localPosition = localPosition;
-                prefab.transform.localRotation = localRotation; 
+                prefab.transform.localRotation = localRotation;
+                prefab.transform.localScale = blockResource.prefab.transform.localScale;
             }
 
             int verticesIndex = vertices.Count;
@@ -87,10 +84,7 @@ public static class ShipBuilder
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
-        meshFilter.sharedMesh = mesh;
-        meshRenderer.material = ResourceUtility.shipMaterial;
-
-        return ship;
+        shipBody.AddOrGetComponent<MeshFilter>().sharedMesh = mesh;
     }
     public static GameObject Build(IShipDataContainer data, IEnumerable<ShipBlock> shipBlocks)
     {

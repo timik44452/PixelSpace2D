@@ -10,9 +10,6 @@ public class MissleLauncher : Weapon
 
         launcher.transform.rotation = Quaternion.LookRotation((Vector3)point - transform.position);
 
-        if (raycastHit2D.collider && raycastHit2D.collider.GetComponent<Ship>())
-        {
-            raycastHit2D.collider.GetComponent<Ship>().Explosion(5F, point);
-        }
+        raycastHit2D.collider?.SendMessage("Explosion", null, SendMessageOptions.DontRequireReceiver);
     }
 }
