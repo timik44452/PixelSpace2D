@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Engine : MonoBehaviour
 {
@@ -6,7 +7,6 @@ public class Engine : MonoBehaviour
     public float temperature = 0.0F;
 
     public bool autoDisable = false;
-    public bool forcedMode = false;
 
     private Rigidbody2D m_rigidbody2D;
     private ParticleSystem m_particleSystem;
@@ -14,20 +14,17 @@ public class Engine : MonoBehaviour
     private bool _enabled = false;
     private bool _overheatAutoDisable = false;
 
-    private const float forceModeMultiply = 5F;
+    private float forcingLimit = 5F;
+
     private const float disableOverheatTemperature = 750F;
     private const float overheatTemperature = 1000F;
 
 
-    public void Thrust(float power)
+    public void Thrust(float power, float forcing = 0F)
     {
         force = Mathf.Clamp01(power);
-
-        if (forcedMode)
-        {
-            force *= forceModeMultiply;
-        }
-
+        force += Mathf.Clamp01(forcing) * forcingLimit;
+        
         if (force > 0)
         {
             Enable();
