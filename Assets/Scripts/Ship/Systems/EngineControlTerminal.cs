@@ -1,31 +1,37 @@
 ﻿using Game.ShipService;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class EngineControlTerminal : MonoBehaviour
 {
+    [System.Serializable]
+    public class PIDOptions
+    {
+        public float P = 0.7F;
+        public float I = 0.01F;
+        public float D = 0.2F;
+    }
+
     public Vector3 direction = Vector3.zero;
-    
+    public PIDOptions options = new PIDOptions();
+
     public bool IsHandWorkMode = false;
     public bool EngineAutoDisable = false;
     public bool EngineForceMode = false;
     public bool LimitAngularVelocity = true;
 
     private Ship _ship;
-    private Dictionary<Engine, PIDController> _angularPIDs = new Dictionary<Engine, PIDController>();
+    private PIDController _angularPID;
 
     private const float maxAngularVelocity = 1000;
     private const float limitedAngularVelocity = 50;
     private const float threshould = 0.01F;
-    private const float P = 0.7F;
-    private const float I = 0.01F;
-    private const float D = 0.2F;
 
+    
     private void Start()
     {
         _ship = GetComponentInParent<Ship>();
+        _angularPID = new PIDController(options.P, options.I, options.D);
     }
 
     private void FixedUpdate()
@@ -35,15 +41,12 @@ public class EngineControlTerminal : MonoBehaviour
         float angularVelocityOffset = inputDirection.x * (LimitAngularVelocity ? limitedAngularVelocity : maxAngularVelocity);
         float angularVelocity = _ship.currentRigidbody2D.angularVelocity + angularVelocityOffset;
 
+        _angularPID.P = options.P;
+        _angularPID.I = options.I;
+        _angularPID.D = options.D;
+
         foreach (Engine engine in _ship.GetComponentsInChildren<Engine>())
         {
-            if (_angularPIDs.ContainsKey(engine) == false)
-            {
-                _angularPIDs.Add(engine, new PIDController(P, I, D));
-            }
-
-            PIDController angularPID = _angularPIDs[engine];
-
             Vector2 up = transform.worldToLocalMatrix.MultiplyVector(engine.transform.up);
             Vector2 comDirection = (_ship.currentRigidbody2D.centerOfMass - (Vector2)engine.transform.localPosition).normalized;
 
@@ -52,7 +55,7 @@ public class EngineControlTerminal : MonoBehaviour
 
             if (Math.Abs(angularVelocity) > threshould)
             {
-                force = angularPID.PID(angularVelocity / angular, 0);
+                force = _angularPID.PID(angularVelocity / angular, 0);
             }
 
             if (Mathf.Abs(force) < threshould)
@@ -60,7 +63,12 @@ public class EngineControlTerminal : MonoBehaviour
                 force = 0;
             }
 
-            engine.Thrust(inputDirection.y + force, GetForcing());
+            if(Mathf.Sign(inputDirection.y) == Mathf.Sign(Vector2.Dot(_ship.transform.up, engine.transform.up)))
+            {
+                force += Mathf.Abs(inputDirection.y);
+            }
+
+            engine.Thrust(force, GetForcing());
         }
     }
 
@@ -93,5 +101,12 @@ public class EngineControlTerminal : MonoBehaviour
         float sign = (forceDirection.x * delta.y - forceDirection.y * delta.x);
 
         return sina * sign;
+    }
+
+    private GUIGraph graph = new GUIGraph();
+
+    private void OnGUI()
+    {
+        graph.Draw(new Rect(0, 0, 250, 250));
     }
 }
